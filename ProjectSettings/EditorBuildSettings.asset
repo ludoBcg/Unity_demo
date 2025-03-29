@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/MyAssets/MyScenes/1_gallery_scene.unity
     guid: 4eb65d927343815468cbbca06ceef424
+  - enabled: 1
+    path: Assets/MyAssets/MyScenes/2_car_scene.unity
+    guid: 46a4b00e2fd457a44abc2dbb93a1cb75
   m_configObjects: {}
