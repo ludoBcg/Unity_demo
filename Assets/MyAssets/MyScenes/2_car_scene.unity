@@ -1682,7 +1682,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 489324, guid: 372a853e9887b444381e54446d024e4d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.21
+      value: 0.18
       objectReference: {fileID: 0}
     - target: {fileID: 489324, guid: 372a853e9887b444381e54446d024e4d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1798,10 +1798,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45be904519e806f45ad23694c5ee9387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horsePower: 2000
+  horsePower: 20000
   turnSpeed: 45
   speedometerText: {fileID: 297080331}
-  speed: 0
+  speed: 10
   rpmText: {fileID: 1733955105}
   rpm: 0
   allWheels:
