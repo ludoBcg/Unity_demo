@@ -28,6 +28,8 @@ public class PlayerController : MonoBehaviour
     private float horizontalInput;
     private float forwardInput;
 
+    private bool grounded = false;
+
 
     private void Start()
     {
@@ -42,6 +44,18 @@ public class PlayerController : MonoBehaviour
 
         rpm = Mathf.Round((speed % 30) * 40);
         rpmText.SetText("RPM: " + rpm);
+
+        
+        foreach (WheelCollider wheelCollider in allWheels)
+        {
+            if (!wheelCollider.isGrounded)
+            {
+                grounded = false;
+                return;
+            }
+        }
+        grounded = true;
+
     }
 
     // Update is called once per frame
@@ -52,11 +66,17 @@ public class PlayerController : MonoBehaviour
         // frontward/backward user controls
         forwardInput = Input.GetAxis("Vertical");
 
-        // Move vehicle forward
-        //transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
-        playerRB.AddRelativeForce(transform.forward * horsePower * forwardInput);
 
-        // rotate vehicle
-        transform.Rotate(Vector3.up, Time.deltaTime * turnSpeed * horizontalInput);
+        if (grounded)
+        {
+            // Move vehicle forward
+            //transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
+            playerRB.AddRelativeForce(transform.forward * horsePower * forwardInput);
+
+            // rotate vehicle
+            transform.Rotate(Vector3.up, Time.deltaTime * turnSpeed * horizontalInput);
+        }
+        
     }
+
 }
