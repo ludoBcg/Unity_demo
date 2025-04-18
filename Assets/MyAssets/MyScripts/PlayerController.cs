@@ -6,9 +6,11 @@ using TMPro;
 public class PlayerController : MonoBehaviour
 {
     // forward speed
-    [SerializeField] float horsePower = 10.0f;
+    [SerializeField] float horsePower = 20000.0f;
     // turning speed
-    [SerializeField] float turnSpeed = 45.0f;
+    [SerializeField] float turnSpeed = 5000.0f;
+    // maximum speed
+    [SerializeField] float maxSpeed = 50.0f;
 
     // display speed
     [SerializeField] TextMeshProUGUI speedometerText;
@@ -28,13 +30,11 @@ public class PlayerController : MonoBehaviour
     private float horizontalInput;
     private float forwardInput;
 
-    private bool grounded = false;
-
 
     private void Start()
     {
         playerRB = GetComponent<Rigidbody>();
-        playerRB.centerOfMass = centerOfMass.transform.position;
+        //playerRB.centerOfMass = centerOfMass.transform.localPosition;
     }
 
     void Update()
@@ -44,17 +44,6 @@ public class PlayerController : MonoBehaviour
 
         rpm = Mathf.Round((speed % 30) * 40);
         rpmText.SetText("RPM: " + rpm);
-
-        
-        foreach (WheelCollider wheelCollider in allWheels)
-        {
-            if (!wheelCollider.isGrounded)
-            {
-                grounded = false;
-                return;
-            }
-        }
-        grounded = true;
 
     }
 
@@ -66,17 +55,27 @@ public class PlayerController : MonoBehaviour
         // frontward/backward user controls
         forwardInput = Input.GetAxis("Vertical");
 
+        // rotate vehicle
+        playerRB.AddTorque(playerRB.transform.up * turnSpeed * horizontalInput);
 
-        if (grounded)
+        foreach (WheelCollider wheelCollider in allWheels)
         {
-            // Move vehicle forward
-            //transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
-            playerRB.AddRelativeForce(transform.forward * horsePower * forwardInput);
-
-            // rotate vehicle
-            transform.Rotate(Vector3.up, Time.deltaTime * turnSpeed * horizontalInput);
+            if (!wheelCollider.isGrounded)
+            {
+                // skip update
+                return;
+            }
         }
+
+
+        // Move vehicle forward
+        //transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
+        if (speed < maxSpeed)
+            playerRB.AddForce(playerRB.transform.forward * horsePower * forwardInput);
+
         
+
+
     }
 
 }
