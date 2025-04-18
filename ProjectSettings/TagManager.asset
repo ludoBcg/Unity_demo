@@ -6,6 +6,9 @@ TagManager:
   tags:
   - wheel
   - Car
+  - Wall
+  - Ground
+  - Ball
   layers:
   - Default
   - TransparentFX
