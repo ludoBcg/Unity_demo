@@ -29,4 +29,9 @@ public class SimpleCameraController : MonoBehaviour
 
         transform.localEulerAngles = new Vector3(rotationX, transform.localEulerAngles.y, 0);
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("OnTriggerEnter Cam");
+    }
 }
