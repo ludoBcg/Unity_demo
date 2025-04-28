@@ -12,7 +12,7 @@ public class FollowPlayer : MonoBehaviour
 
 
     // Update is called once per frame
-    // use lateUpdate() instead of Updta() to avoid jittering
+    // use lateUpdate() instead of Update() to avoid jittering
     void LateUpdate()
     {
         // follow the player's position

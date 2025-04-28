@@ -3,7 +3,7 @@ using UnityEngine;
 public class SimpleCameraController : MonoBehaviour
 {
     public float moveSpeed = 3.0f;           // Movement speed
-    public float rotationSpeed = 100.0f;      // Rotation speed for A/D keys in degrees per second
+    public float rotationSpeed = 100.0f;     // Rotation speed for A/D keys in degrees per second
     public float mouseSensitivity = 1.0f;    // Mouse look sensitivity
 
     private float rotationX = 0.0f;          // Rotation around the X axis (up and down look)
