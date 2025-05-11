@@ -6,37 +6,43 @@ using UnityEngine;
 public class BallBehavior : MonoBehaviour
 {
     private Rigidbody ballRb;
-    private bool wasShot;
+    private bool wasShot = false;
+    //private bool hasStopped = false;
 
     private float epsilon = 0.001f;
 
-
+    
     // Start is called before the first frame update
     void Start()
     {
         ballRb = GetComponent<Rigidbody>();
-        wasShot = false;
-        // desable gravity at beginning
+        // disable gravity at beginning
         ballRb.useGravity = false;
+        wasShot = false;
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
 
+        // consider the ball has been shot when RB has force applied to it
+        // do not change wasShot flag in Shoot() to avoid it been checked before animation loop
+        if (ballRb.GetAccumulatedForce() != new Vector3(0.0f, 0.0f, 0.0f))
+        {
+            // cannot be shot anymore
+            wasShot = true;
+        }
     }
 
     // to be called by player when he shoots
-    public void Shoot(float _shootingForce)
+    public void Shoot(Vector3 _direction, float _shootingForce)
     {
         if (!wasShot)
         {
             // enable gravity
             ballRb.useGravity = true;
             // shoot
-            ballRb.AddForce(Vector3.forward * _shootingForce, ForceMode.Impulse);
-            // cannot be shot anymore
-            wasShot = true;
+            ballRb.AddForce(_direction * _shootingForce, ForceMode.Impulse);
         }
     }
 
@@ -45,7 +51,7 @@ public class BallBehavior : MonoBehaviour
     {
         if (wasShot)
         {
-            if ( Mathf.Abs(-ballRb.velocity.x) < epsilon
+            if (Mathf.Abs(-ballRb.velocity.x) < epsilon
               && Mathf.Abs(-ballRb.velocity.y) < epsilon
               && Mathf.Abs(-ballRb.velocity.z) < epsilon)
             {

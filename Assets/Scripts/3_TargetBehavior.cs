@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class TargetBehavior : MonoBehaviour
 {
-    private Rigidbody ballRb;
+    private Rigidbody targetRb;
 
     private float epsilon = 0.001f;
 
@@ -13,9 +13,8 @@ public class TargetBehavior : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ballRb = GetComponent<Rigidbody>();
-        // desable gravity at beginning
-        ballRb.useGravity = true;
+        targetRb = GetComponent<Rigidbody>();
+        targetRb.useGravity = true;
     }
 
     // Update is called once per frame
@@ -27,12 +26,13 @@ public class TargetBehavior : MonoBehaviour
     // checks if the ball is still moving or not
     public bool stopped()
     {
-        if (Mathf.Abs(-ballRb.velocity.x) < epsilon
-            && Mathf.Abs(-ballRb.velocity.y) < epsilon
-            && Mathf.Abs(-ballRb.velocity.z) < epsilon)
+        if (Mathf.Abs(-targetRb.velocity.x) < epsilon
+            && Mathf.Abs(-targetRb.velocity.y) < epsilon
+            && Mathf.Abs(-targetRb.velocity.z) < epsilon)
         {
             return true;
         }
         return false;
     }
+
 }
