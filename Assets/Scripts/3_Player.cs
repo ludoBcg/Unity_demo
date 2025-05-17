@@ -9,18 +9,21 @@ public class Player : MonoBehaviour
     public GameObject ballPrefab;
     public GameObject target;
     public GameObject arrowDir;
+    public GameObject scoringManager;
 
     private GameObject currentBall;
     private BallBehavior ballScript;
     private TargetBehavior targetScript;
+    private ScoringManager scoringScript;
 
-    // display speed
     [SerializeField] TextMeshProUGUI BallCounterText;
     [SerializeField] TextMeshProUGUI ForceCounterText;
 
+    public Vector3 playerPos = new Vector3(0.0f, 1.5f, -8.0f);
     public float maxShootingForce = 80.0f;
     public float minShootingForce = 30.0f;
     public int ballCounter = 3;
+    public float maxOffset = 0.1f; // maxOffset for random shooting direction
 
     private Vector3 ballInitPos = Vector3.zero;
     private Vector3 shootingDir = Vector3.zero;
@@ -37,9 +40,10 @@ public class Player : MonoBehaviour
         shootingForce = minShootingForce;
 
         targetScript = target.GetComponent<TargetBehavior>();
+        scoringScript = scoringManager.GetComponent<ScoringManager>();
 
-        ballInitPos = new Vector3(0.0f, 1.5f, -8.0f);
-        arrowDir.transform.position = ballInitPos + new Vector3(0.0f, 0.0f, 1.0f);
+        ballInitPos = playerPos;
+        arrowDir.transform.position = ballInitPos + new Vector3(-0.12f, 0.0f, 1.0f);
 
         SpawnBall();
     }
@@ -90,6 +94,7 @@ public class Player : MonoBehaviour
             if (ballScript.stopped() && targetScript.stopped())
             {
                 SpawnBall();
+                scoringScript.calculateScore();
             }
         }
 
@@ -99,17 +104,24 @@ public class Player : MonoBehaviour
     {
         ballInHand = true;
         ballCounter--;
+        
         currentBall = Instantiate(ballPrefab, ballInitPos, ballPrefab.transform.rotation);
         ballScript = currentBall.GetComponent<BallBehavior>();
         arrowDir.SetActive(true);
+
         Debug.Log("spawn");
     }
 
     void Shoot()
     {
         ballInHand = false;
+
+        // add randomness to the shooting dir
+        shootingDir += new Vector3(Random.Range(-maxOffset, maxOffset), Random.Range(-maxOffset, maxOffset), Random.Range(-maxOffset, maxOffset));
+        
         ballScript.Shoot(shootingDir, shootingForce);
         arrowDir.SetActive(false);
+
         Debug.Log("Shoot(" + shootingDir + " , " + shootingForce.ToString() + ")");
     }
 

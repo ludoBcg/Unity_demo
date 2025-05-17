@@ -24,11 +24,13 @@ public class CameraController : MonoBehaviour
     {
         // Rotation with A/D keys
         float rotHorizontal = Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime;
-        transform.Rotate(0, rotHorizontal, 0, Space.World); // Rotate around the global Y axis
+        //transform.Rotate(0, rotHorizontal, 0, Space.World); // Rotate around the global Y axis
+        transform.RotateAround(playerScript.playerPos, Vector3.up, rotHorizontal);
 
         // Rotation with W/S keys
         float rotVertical = Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime;
-        transform.Rotate(-rotVertical, 0, 0, Space.Self); // Rotate around the global X axis
+        //transform.Rotate(-rotVertical, 0, 0, Space.Self); // Rotate around the global X axis
+        transform.RotateAround(playerScript.playerPos, -transform.right, rotVertical);
 
         playerScript.rotateArrow(rotHorizontal, rotVertical);
 
