@@ -11,6 +11,8 @@ public class BallBehavior : MonoBehaviour
 
     private float epsilon = 0.001f;
 
+    private bool isPlayer = true; // flag for player's or opponent's balls
+
     
     // Start is called before the first frame update
     void Start()
@@ -37,8 +39,11 @@ public class BallBehavior : MonoBehaviour
     // to be called by player when he shoots
     public void Shoot(Vector3 _direction, float _shootingForce)
     {
+        Start();
         if (!wasShot)
         {
+            if (ballRb == null)
+                UnityEngine.Debug.Log("Shoot() null ballRb");
             // enable gravity
             ballRb.useGravity = true;
             // shoot
@@ -59,5 +64,15 @@ public class BallBehavior : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public void assignToPlayer(bool _isPlayer)
+    {
+        isPlayer = _isPlayer;
+    }
+
+    public bool belongsToPlayer()
+    {
+        return isPlayer;
     }
 }

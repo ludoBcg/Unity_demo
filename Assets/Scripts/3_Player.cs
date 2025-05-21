@@ -6,14 +6,12 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
 
-    public GameObject ballPrefab;
-    public GameObject target;
+    public GameObject playerBallPrefab;
     public GameObject arrowDir;
-    public GameObject scoringManager;
+    public GameObject scoreManager;
 
     private GameObject currentBall;
     private BallBehavior ballScript;
-    private TargetBehavior targetScript;
     private ScoringManager scoringScript;
 
     [SerializeField] TextMeshProUGUI BallCounterText;
@@ -30,6 +28,7 @@ public class Player : MonoBehaviour
     private float shootingForce = 0.0f;
     private bool ballInHand = false;
     private bool isKeyDown = false;
+    private bool activated = false;
 
 
 
@@ -39,65 +38,55 @@ public class Player : MonoBehaviour
         shootingDir = Vector3.forward;
         shootingForce = minShootingForce;
 
-        targetScript = target.GetComponent<TargetBehavior>();
-        scoringScript = scoringManager.GetComponent<ScoringManager>();
-
         ballInitPos = playerPos;
         arrowDir.transform.position = ballInitPos + new Vector3(-0.12f, 0.0f, 1.0f);
 
-        SpawnBall();
+        Debug.Log("player Start ");
     }
 
     // Update is called once per frame
     void Update()
     {
-        // UI
-        int nbBalls = ballCounter + 1;
-        BallCounterText.SetText("Balls: " + nbBalls);
-        ForceCounterText.SetText("Force: " + shootingForce.ToString("#.00"));
-
-        // Shooting
-        if (ballInHand)
+        if (activated)
         {
-            // press spacebar to start accumalte shooting force
-            if (Input.GetKeyDown(KeyCode.Space))
+            // UI
+            int nbBalls = ballCounter + 1;
+            BallCounterText.SetText("Balls: " + nbBalls);
+            ForceCounterText.SetText("Force: " + shootingForce.ToString("#.00"));
+            
+            // Shooting
+            if (ballInHand)
             {
-                isKeyDown = true;
-            }
-            // release spacebar to shoot
-            if (Input.GetKeyUp(KeyCode.Space))
-            {
-                if (isKeyDown)
-                    Shoot();
+                // press spacebar to start accumalte shooting force
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    isKeyDown = true;
+                }
+                // release spacebar to shoot
+                if (Input.GetKeyUp(KeyCode.Space))
+                {
+                    if (isKeyDown)
+                        Shoot();
 
-                isKeyDown = false;
-                // erase accumulated force
-                shootingForce = minShootingForce;
+                    isKeyDown = false;
+                    // erase accumulated force
+                    shootingForce = minShootingForce;
+                }
             }
+            
         }
-
     }
 
     void FixedUpdate()
     {
-        // increase shooting force if spacebar is pressed
-        if (isKeyDown && shootingForce < maxShootingForce)
+        if (activated)
         {
-            shootingForce += 0.1f;
-        }
-
-        // spawns a new ball after the previous one was shot,
-        // if there are still balls available
-        if (!ballInHand && ballCounter > 0)
-        {
-            // wait for previous balls and target to be still
-            if (ballScript.stopped() && targetScript.stopped())
+            // increase shooting force if spacebar is pressed
+            if (isKeyDown && shootingForce < maxShootingForce)
             {
-                SpawnBall();
-                scoringScript.calculateScore();
+                shootingForce += 0.1f;
             }
         }
-
     }
 
     void SpawnBall()
@@ -105,11 +94,12 @@ public class Player : MonoBehaviour
         ballInHand = true;
         ballCounter--;
         
-        currentBall = Instantiate(ballPrefab, ballInitPos, ballPrefab.transform.rotation);
+        currentBall = Instantiate(playerBallPrefab, ballInitPos, playerBallPrefab.transform.rotation);
         ballScript = currentBall.GetComponent<BallBehavior>();
+        ballScript.assignToPlayer(true);
         arrowDir.SetActive(true);
 
-        Debug.Log("spawn");
+        Debug.Log("player spawn");
     }
 
     void Shoot()
@@ -118,11 +108,12 @@ public class Player : MonoBehaviour
 
         // add randomness to the shooting dir
         shootingDir += new Vector3(Random.Range(-maxOffset, maxOffset), Random.Range(-maxOffset, maxOffset), Random.Range(-maxOffset, maxOffset));
-        
+        shootingDir.Normalize();
+
         ballScript.Shoot(shootingDir, shootingForce);
         arrowDir.SetActive(false);
 
-        Debug.Log("Shoot(" + shootingDir + " , " + shootingForce.ToString() + ")");
+        Debug.Log("player shoot");
     }
 
     public void rotateArrow(float _rotHorizontal, float _rotVertical)
@@ -134,5 +125,26 @@ public class Player : MonoBehaviour
     public void setShootingDir(Vector3 _direction)
     {
         shootingDir = _direction;
+    }
+
+    public void activate()
+    {
+        activated = true;
+        Start();
+
+        if (ballCounter>0)
+            SpawnBall();
+        Debug.Log("player activated");
+    }
+
+    public void deactivate()
+    {
+        activated = false;
+        Debug.Log("player deactivated");
+    }
+
+    public bool getballInHand()
+    {
+        return ballInHand;
     }
 }

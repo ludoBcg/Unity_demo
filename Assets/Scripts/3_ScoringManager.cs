@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class ScoringManager : MonoBehaviour
@@ -11,6 +12,10 @@ public class ScoringManager : MonoBehaviour
     private GameObject scoringBall;
 
     private GameObject[] listBalls;
+
+    [SerializeField] TextMeshProUGUI pointsText;
+
+    private bool playerHasPoint = false; // flag to indicate who is currently leading
 
     // Start is called before the first frame update
     void Start()
@@ -41,6 +46,23 @@ public class ScoringManager : MonoBehaviour
             }
         }
 
+        BallBehavior ballScript = scoringBall.GetComponent<BallBehavior>();
+        if (ballScript.belongsToPlayer())
+        {
+            pointsText.SetText("Player: 1 point");
+            playerHasPoint = true;
+        }
+        else
+        {
+            pointsText.SetText("Opponent: 1 point");
+            playerHasPoint = false;
+        }
+
         scoringMarker.SetActive(true);
+    }
+
+    public bool getPlayerHasPoint()
+    {
+        return playerHasPoint;
     }
 }
