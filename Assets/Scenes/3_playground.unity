@@ -572,11 +572,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 926e99ccc69c4714ca5dab160a7975f5, type: 3}
---- !u!1 &518791108 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7344040856275374838, guid: 926e99ccc69c4714ca5dab160a7975f5, type: 3}
-  m_PrefabInstance: {fileID: 518791107}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &659662458
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,8 +835,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d9d0833412e1c94a9020b0801691ce8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scoringMarkerPrefab: {fileID: 7344040856275374838, guid: 926e99ccc69c4714ca5dab160a7975f5, type: 3}
   target: {fileID: 2055213338}
-  scoringMarker: {fileID: 518791108}
   pointsText: {fileID: 1034522905}
 --- !u!4 &910946723
 Transform:
