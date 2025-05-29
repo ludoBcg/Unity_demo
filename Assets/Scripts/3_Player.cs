@@ -77,6 +77,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // cf. https://docs.unity3d.com/460/Documentation/Manual/ExecutionOrder.html
     void FixedUpdate()
     {
         if (activated)
@@ -84,7 +85,7 @@ public class Player : MonoBehaviour
             // increase shooting force if spacebar is pressed
             if (isKeyDown && shootingForce < maxShootingForce)
             {
-                shootingForce += 0.1f;
+                shootingForce += 0.2f;
             }
         }
     }
@@ -99,7 +100,7 @@ public class Player : MonoBehaviour
         ballScript.assignToPlayer(true);
         arrowDir.SetActive(true);
 
-        Debug.Log("player spawn");
+        //Debug.Log("player spawn");
     }
 
     void Shoot()
@@ -113,7 +114,7 @@ public class Player : MonoBehaviour
         ballScript.Shoot(shootingDir, shootingForce);
         arrowDir.SetActive(false);
 
-        Debug.Log("player shoot");
+        //Debug.Log("player shoot");
     }
 
     public void rotateArrow(float _rotHorizontal, float _rotVertical)
@@ -134,17 +135,22 @@ public class Player : MonoBehaviour
 
         if (ballCounter>0)
             SpawnBall();
-        Debug.Log("player activated");
+        //Debug.Log("player activated");
     }
 
     public void deactivate()
     {
         activated = false;
-        Debug.Log("player deactivated");
+        //Debug.Log("player deactivated");
     }
 
-    public bool getballInHand()
+    public bool getBallInHand()
     {
         return ballInHand;
+    }
+
+    public int getBallCounter()
+    {
+        return ballCounter;
     }
 }

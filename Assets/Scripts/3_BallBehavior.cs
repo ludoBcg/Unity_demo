@@ -7,7 +7,6 @@ public class BallBehavior : MonoBehaviour
 {
     private Rigidbody ballRb;
     private bool wasShot = false;
-    //private bool hasStopped = false;
 
     private float epsilon = 0.001f;
 
@@ -42,8 +41,6 @@ public class BallBehavior : MonoBehaviour
         Start();
         if (!wasShot)
         {
-            if (ballRb == null)
-                UnityEngine.Debug.Log("Shoot() null ballRb");
             // enable gravity
             ballRb.useGravity = true;
             // shoot

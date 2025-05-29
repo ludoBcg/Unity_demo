@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
 
     private bool isSceneStill = true;   // flag if balls are rolling or not
     private bool turnFinished = true;   // flag if current turn is finished or not
+    private bool roundFinished = false;  // flag if current round is finished or not
 
 
     // Start is called before the first frame update
@@ -28,10 +29,6 @@ public class GameManager : MonoBehaviour
         opponentScript = opponent.GetComponent<OpponentBehavior>();
         scoringScript = scoreManager.GetComponent<ScoringManager>();
         targetScript = target.GetComponent<TargetBehavior>();
-
-
-        //opponentScript.deactivate();
-        //playerScript.activate();
     }
 
     void FixedUpdate()
@@ -46,42 +43,76 @@ public class GameManager : MonoBehaviour
 
     void LateUpdate()
     {
-        // wait for scene to be still
-        if (!isSceneStill)
+        if (!roundFinished)
         {
-            isSceneStill = checkStillness();
-        }
-
-        // update score
-        if (isSceneStill && !turnFinished)
-        {
-            scoringScript.calculateScore();
-            turnFinished = true;
-        }
-
-        // activate player of oponent depending on score
-        if (turnFinished)
-        {
-            beforeShot();
-
-            if (scoringScript.getPlayerHasPoint())
+            // wait for scene to be still
+            if (!isSceneStill)
             {
-                playerScript.deactivate();
-                opponentScript.activate();
-            }
-            else
-            {
-                opponentScript.deactivate();
-                playerScript.activate();
+                isSceneStill = checkStillness();
             }
 
-            afterShot();
-        }
+            // update score
+            if (isSceneStill && !turnFinished)
+            {
+                scoringScript.calculateScore();
+                turnFinished = true;
+            }
+
+            // activate player or opponent depending on score
+            if (turnFinished)
+            {
+                beforeShot();
+
+                if (scoringScript.getPlayerHasPoint())
+                {
+                    // if player has the point...
+
+                    if (opponentScript.getBallCounter() > 0)
+                    {
+                        // if opponent still has balls, let it play
+                        playerScript.deactivate();
+                        opponentScript.activate();
+                    }
+                    else if (playerScript.getBallCounter() > 0)
+                    {
+                        // if not, player continues as lon as it can
+                        opponentScript.deactivate();
+                        playerScript.activate();
+                    }
+                }
+                else if (!scoringScript.getPlayerHasPoint())
+                {
+                    // if opponent has the point...
+
+                    if (playerScript.getBallCounter() > 0)
+                    {
+                        // if player still has balls, let it play
+                        opponentScript.deactivate();
+                        playerScript.activate();
+                    }
+                    else if(opponentScript.getBallCounter() > 0)
+                    {
+                        // if not, opponent continues as long as it can
+                        playerScript.deactivate();
+                        opponentScript.activate();
+                    }
+                }
+
+
+                afterShot();
+            }
+        } // end if !roundFinished
     }
 
     void beforeShot()
     {
         turnFinished = false;
+
+        if (opponentScript.getBallCounter() <= 0 && playerScript.getBallCounter() <= 0)
+        {
+            Debug.Log("round finished");
+            roundFinished = true;
+        }
     }
 
     void afterShot()
@@ -113,7 +144,7 @@ public class GameManager : MonoBehaviour
             isStill = false;
 
         // check if player does not have ball in hand
-        if (playerScript.getballInHand())
+        if (playerScript.getBallInHand())
             isStill = false;
 
 

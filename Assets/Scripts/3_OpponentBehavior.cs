@@ -45,7 +45,7 @@ public class OpponentBehavior : MonoBehaviour
         ballScript = currentBall.GetComponent<BallBehavior>();
         ballScript.assignToPlayer(false);
 
-        Debug.Log("opponent spawn");
+        //Debug.Log("opponent spawn");
     }
 
     public void Shoot()
@@ -59,11 +59,11 @@ public class OpponentBehavior : MonoBehaviour
         shootingDir.Normalize();
         ballScript.Shoot(shootingDir/*Vector3.forward*/, UnityEngine.Random.Range(minForce, maxForce));
 
-        Debug.Log("opponent shoot");
+        //Debug.Log("opponent shoot");
     }
 
 
-    public int GetBallCounter()
+    public int getBallCounter()
     {
         return ballCounter;
     }
@@ -83,12 +83,12 @@ public class OpponentBehavior : MonoBehaviour
         activated = true;
         if (ballCounter > 0)
             SpawnBall();
-        Debug.Log("opponent activated");
+        //Debug.Log("opponent activated");
     }
 
     public void deactivate()
     {
         activated = false;
-        Debug.Log("opponent deactivated");
+        //Debug.Log("opponent deactivated");
     }
 }
