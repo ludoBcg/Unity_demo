@@ -35,4 +35,11 @@ public class TargetBehavior : MonoBehaviour
         return false;
     }
 
+    // re-initialize target position
+    public void reInit()
+    {
+        targetRb.velocity = new Vector3(0.0f, 0.0f, 0.0f);
+        transform.position = new Vector3(0.0f, 0.187f, 5.0f);
+    }
+
 }

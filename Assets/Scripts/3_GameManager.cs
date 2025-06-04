@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
@@ -9,6 +10,12 @@ public class GameManager : MonoBehaviour
     public GameObject opponent;
     public GameObject scoreManager;
     public GameObject target;
+    public int pointsToWin = 7;  // nb of points to reach to win
+
+    [SerializeField] TextMeshProUGUI messageBoxText;
+    [SerializeField] TextMeshProUGUI playerScoreText;
+    [SerializeField] TextMeshProUGUI opponentScoreText;
+    [SerializeField] TextMeshProUGUI pointsToWinText;
 
     private Player playerScript;
     private OpponentBehavior opponentScript;
@@ -21,6 +28,10 @@ public class GameManager : MonoBehaviour
     private bool turnFinished = true;   // flag if current turn is finished or not
     private bool roundFinished = false;  // flag if current round is finished or not
 
+    private bool gameFinished = false;  // flag ifgame is finished or not
+
+    private int totalPlayerPoints = 0;
+    private int totalOpponentPoints = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -29,6 +40,8 @@ public class GameManager : MonoBehaviour
         opponentScript = opponent.GetComponent<OpponentBehavior>();
         scoringScript = scoreManager.GetComponent<ScoringManager>();
         targetScript = target.GetComponent<TargetBehavior>();
+
+        pointsToWinText.SetText(pointsToWin + " points to win");
     }
 
     void FixedUpdate()
@@ -43,65 +56,72 @@ public class GameManager : MonoBehaviour
 
     void LateUpdate()
     {
-        if (!roundFinished)
+        if (!gameFinished)
         {
-            // wait for scene to be still
-            if (!isSceneStill)
+            if (!roundFinished)
             {
-                isSceneStill = checkStillness();
-            }
-
-            // update score
-            if (isSceneStill && !turnFinished)
-            {
-                scoringScript.calculateScore();
-                turnFinished = true;
-            }
-
-            // activate player or opponent depending on score
-            if (turnFinished)
-            {
-                beforeShot();
-
-                if (scoringScript.getPlayerHasPoint())
+                // wait for scene to be still
+                if (!isSceneStill)
                 {
-                    // if player has the point...
-
-                    if (opponentScript.getBallCounter() > 0)
-                    {
-                        // if opponent still has balls, let it play
-                        playerScript.deactivate();
-                        opponentScript.activate();
-                    }
-                    else if (playerScript.getBallCounter() > 0)
-                    {
-                        // if not, player continues as lon as it can
-                        opponentScript.deactivate();
-                        playerScript.activate();
-                    }
-                }
-                else if (!scoringScript.getPlayerHasPoint())
-                {
-                    // if opponent has the point...
-
-                    if (playerScript.getBallCounter() > 0)
-                    {
-                        // if player still has balls, let it play
-                        opponentScript.deactivate();
-                        playerScript.activate();
-                    }
-                    else if(opponentScript.getBallCounter() > 0)
-                    {
-                        // if not, opponent continues as long as it can
-                        playerScript.deactivate();
-                        opponentScript.activate();
-                    }
+                    isSceneStill = checkStillness();
                 }
 
+                // update score
+                if (isSceneStill && !turnFinished)
+                {
+                    scoringScript.calculateScore();
+                    turnFinished = true;
+                }
 
-                afterShot();
+                // activate player or opponent depending on score
+                if (turnFinished)
+                {
+                    beforeShot();
+
+                    if (scoringScript.getPlayerHasPoint())
+                    {
+                        // if player has the point...
+
+                        if (opponentScript.getBallCounter() > 0)
+                        {
+                            // if opponent still has balls, let it play
+                            playerScript.deactivate();
+                            opponentScript.activate(scoringScript.getClosestBall());
+                        }
+                        else if (playerScript.getBallCounter() > 0)
+                        {
+                            // if not, player continues as lon as it can
+                            opponentScript.deactivate();
+                            playerScript.activate();
+                        }
+                    }
+                    else if (!scoringScript.getPlayerHasPoint())
+                    {
+                        // if opponent has the point...
+
+                        if (playerScript.getBallCounter() > 0)
+                        {
+                            // if player still has balls, let it play
+                            opponentScript.deactivate();
+                            playerScript.activate();
+                        }
+                        else if (opponentScript.getBallCounter() > 0)
+                        {
+                            // if not, opponent continues as long as it can
+                            playerScript.deactivate();
+                            opponentScript.activate(scoringScript.getClosestBall());
+                        }
+                    }
+
+
+                    afterShot();
+                }
+            } // end if !roundFinished
+            else
+            {
+                startNewRound();
             }
-        } // end if !roundFinished
+        } // end if !gameFinished
     }
 
     void beforeShot()
@@ -110,7 +130,8 @@ public class GameManager : MonoBehaviour
 
         if (opponentScript.getBallCounter() <= 0 && playerScript.getBallCounter() <= 0)
         {
-            Debug.Log("round finished");
+            messageBoxText.SetText("Round finished");
+            messageBoxText.gameObject.SetActive(true);
             roundFinished = true;
         }
     }
@@ -149,5 +170,45 @@ public class GameManager : MonoBehaviour
 
 
         return isStill;
+    }
+
+    void startNewRound()
+    {
+        totalPlayerPoints += scoringScript.getPlayerScore();
+        totalOpponentPoints += scoringScript.getOpponentScore();
+
+        playerScoreText.SetText("Player score: " + totalPlayerPoints);
+        opponentScoreText.SetText("Opponent score: " + totalOpponentPoints);
+
+        if (totalPlayerPoints >= pointsToWin)
+        {
+            gameFinished = true;
+            pointsToWinText.gameObject.SetActive(true);
+            messageBoxText.SetText("You win!");
+            messageBoxText.gameObject.SetActive(true);
+        }
+        if (totalOpponentPoints >= pointsToWin)
+        {
+            gameFinished = true;
+            messageBoxText.SetText("You loose!");
+            messageBoxText.gameObject.SetActive(true);
+        }
+
+        playerScript.newRound();
+        opponentScript.newRound();
+        scoringScript.newRound();
+
+        listBalls = GameObject.FindGameObjectsWithTag("Ball");
+        foreach (GameObject ball in listBalls)
+        {
+            Object.Destroy(ball);
+        }
+        
+        messageBoxText.SetText("New round");
+        messageBoxText.gameObject.SetActive(true);
+        targetScript.reInit();
+        isSceneStill = true;
+        roundFinished = false;
+        turnFinished = true;
     }
 }

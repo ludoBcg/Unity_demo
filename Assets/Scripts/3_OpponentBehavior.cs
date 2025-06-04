@@ -1,18 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class OpponentBehavior : MonoBehaviour
 {
     public GameObject opponentBallPrefab;
     public GameObject target;
+    [SerializeField] TextMeshProUGUI messageBoxText;
 
     public int ballCounter = 3;
     public Vector3 opponentPos = new Vector3(1.0f, 1.5f, -8.0f);
 
     private GameObject currentBall;
     private BallBehavior ballScript;
+    private GameObject closestBall = null;
 
     private bool ballInHand = false;
     private bool activated = false;
@@ -52,12 +55,34 @@ public class OpponentBehavior : MonoBehaviour
     {
         ballInHand = false;
 
+        // Random behavior: shooting (only if closest ball belongs to player) or pointing (default behavior)
+        int isPointing = 1;
         Vector3 shootingDir = target.transform.position - transform.position;
+        float shootingForce = UnityEngine.Random.Range(minForce, maxForce * 0.5f);
+
+        if (closestBall != null)
+        {
+            BallBehavior ballScript = closestBall.GetComponent<BallBehavior>();
+            if (ballScript.belongsToPlayer())
+                isPointing = UnityEngine.Random.Range(0, 2);
+
+            if (isPointing == 0)
+            {
+                shootingDir = closestBall.transform.position - transform.position;
+                shootingForce *= 2.0f;
+                Debug.Log("opponent shooting");
+            }
+            else
+                Debug.Log("opponent pointing");
+        }
+        else
+            Debug.Log("opponent pointing");
+
         shootingDir += new Vector3( UnityEngine.Random.Range(-maxOffset, maxOffset), 
                                     UnityEngine.Random.Range(-maxOffset, maxOffset), 
                                     UnityEngine.Random.Range(-maxOffset, maxOffset) );
         shootingDir.Normalize();
-        ballScript.Shoot(shootingDir/*Vector3.forward*/, UnityEngine.Random.Range(minForce, maxForce));
+        ballScript.Shoot(shootingDir, shootingForce);
 
         //Debug.Log("opponent shoot");
     }
@@ -78,17 +103,28 @@ public class OpponentBehavior : MonoBehaviour
         return ballScript.stopped();
     }
 
-    public void activate()
+    public void activate(GameObject _closestBall)
     {
         activated = true;
+        closestBall = _closestBall;
         if (ballCounter > 0)
             SpawnBall();
-        //Debug.Log("opponent activated");
+
+        messageBoxText.SetText("Opponent turn");
+        messageBoxText.gameObject.SetActive(true);
     }
 
     public void deactivate()
     {
         activated = false;
         //Debug.Log("opponent deactivated");
+    }
+
+    public void newRound()
+    {
+        ballCounter = 3;
+        closestBall = null;
+        ballInHand = false;
+        activated = false;
     }
 }

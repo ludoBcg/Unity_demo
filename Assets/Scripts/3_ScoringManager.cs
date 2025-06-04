@@ -13,10 +13,13 @@ public class ScoringManager : MonoBehaviour
 
     private GameObject[] listBalls;
     private GameObject[] scoringMarkers;
+    private GameObject closestBall = null;
 
     [SerializeField] TextMeshProUGUI pointsText;
 
     private bool playerHasPoint = false; // flag to indicate who is currently leading
+    private int playerPtsCount = 0;
+    private int opponentPtsCount = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -58,17 +61,19 @@ public class ScoringManager : MonoBehaviour
         // sort listBalls using values from listDistances
         Array.Sort(listDistances, listBalls);
 
+        closestBall = listBalls[0];
+
 
         // counters for points
-        int playerPtsCount = 0;
-        int opponentPtsCount = 0;
+        playerPtsCount = 0;
+        opponentPtsCount = 0;
         // for each ball in the game ...
         foreach (GameObject ball in listBalls)
         {
-            BallBehavior ballScriptX = ball.GetComponent<BallBehavior>();
+            BallBehavior ballScript = ball.GetComponent<BallBehavior>();
 
             // sum nb of closest balls for each player
-            if (ballScriptX.belongsToPlayer())
+            if (ballScript.belongsToPlayer())
             {
                 if (opponentPtsCount > 0)
                 {
@@ -117,5 +122,46 @@ public class ScoringManager : MonoBehaviour
     public bool getPlayerHasPoint()
     {
         return playerHasPoint;
+    }
+
+    public GameObject getClosestBall()
+    {
+        return closestBall;
+    }
+
+    public int getPlayerScore()
+    {
+        calculateScore();
+        if ( playerHasPoint && playerPtsCount < 1 ||
+           !playerHasPoint && playerPtsCount != 0 ||
+            playerHasPoint && opponentPtsCount != 0 ||
+           !playerHasPoint && opponentPtsCount < 1 )
+            Debug.Log("INCONSISTENT COUNTER");
+        return playerPtsCount;
+    }
+
+    public int getOpponentScore()
+    {
+        calculateScore();
+        if (playerHasPoint && playerPtsCount < 1 ||
+           !playerHasPoint && playerPtsCount != 0 ||
+            playerHasPoint && opponentPtsCount != 0 ||
+           !playerHasPoint && opponentPtsCount < 1)
+            Debug.Log("INCONSISTENT COUNTER");
+        return opponentPtsCount;
+    }
+
+    public void newRound()
+    {
+        closestBall = null;
+        playerHasPoint = false;
+        playerPtsCount = 0;
+        opponentPtsCount = 0;
+
+        foreach (GameObject marker in scoringMarkers)
+        {
+            marker.SetActive(false);
+        }
+        pointsText.SetText("No points yet");
     }
 }

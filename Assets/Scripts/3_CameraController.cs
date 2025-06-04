@@ -30,6 +30,12 @@ public class CameraController : MonoBehaviour
         // Rotation with W/S keys
         float rotVertical = Input.GetAxis("Vertical") * rotationSpeed * Time.deltaTime;
         //transform.Rotate(-rotVertical, 0, 0, Space.Self); // Rotate around the global X axis
+        if ((rotVertical < 0.0f && transform.rotation.eulerAngles.x > 80.0f && transform.rotation.eulerAngles.x < 278.0f) ||
+             (rotVertical > 0.0f && transform.rotation.eulerAngles.x > 82.0f && transform.rotation.eulerAngles.x < 280.0f))
+        {
+            rotVertical = 0.0f;
+        }
+
         transform.RotateAround(playerScript.playerPos, -transform.right, rotVertical);
 
         playerScript.rotateArrow(rotHorizontal, rotVertical);

@@ -14,8 +14,9 @@ public class Player : MonoBehaviour
     private BallBehavior ballScript;
     private ScoringManager scoringScript;
 
-    [SerializeField] TextMeshProUGUI BallCounterText;
-    [SerializeField] TextMeshProUGUI ForceCounterText;
+    [SerializeField] TextMeshProUGUI ballCounterText;
+    [SerializeField] TextMeshProUGUI forceCounterText;
+    [SerializeField] TextMeshProUGUI messageBoxText;
 
     public Vector3 playerPos = new Vector3(0.0f, 1.5f, -8.0f);
     public float maxShootingForce = 80.0f;
@@ -51,8 +52,8 @@ public class Player : MonoBehaviour
         {
             // UI
             int nbBalls = ballCounter + 1;
-            BallCounterText.SetText("Balls: " + nbBalls);
-            ForceCounterText.SetText("Force: " + shootingForce.ToString("#.00"));
+            ballCounterText.SetText(nbBalls + " balls to play");
+            forceCounterText.SetText("Force: " + shootingForce.ToString("#.00"));
             
             // Shooting
             if (ballInHand)
@@ -135,7 +136,9 @@ public class Player : MonoBehaviour
 
         if (ballCounter>0)
             SpawnBall();
-        //Debug.Log("player activated");
+
+        messageBoxText.SetText("Your turn");
+        messageBoxText.gameObject.SetActive(true);
     }
 
     public void deactivate()
@@ -152,5 +155,13 @@ public class Player : MonoBehaviour
     public int getBallCounter()
     {
         return ballCounter;
+    }
+
+    public void newRound()
+    {
+        ballCounter = 3;
+        ballInHand = false;
+        isKeyDown = false;
+        activated = false;
     }
 }

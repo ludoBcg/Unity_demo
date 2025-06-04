@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+//using System.Diagnostics;
 using UnityEngine;
 
 public class BallBehavior : MonoBehaviour
@@ -9,8 +9,11 @@ public class BallBehavior : MonoBehaviour
     private bool wasShot = false;
 
     private float epsilon = 0.001f;
+    private Vector2 minFieldCoords = new Vector2(-13.5f, -11.5f);
+    private Vector2 maxFieldCoords = new Vector2(13.5f, 13.5f);
 
     private bool isPlayer = true; // flag for player's or opponent's balls
+
 
     
     // Start is called before the first frame update
@@ -33,6 +36,30 @@ public class BallBehavior : MonoBehaviour
             // cannot be shot anymore
             wasShot = true;
         }
+
+        // Delete balls when thrown out of field
+        if(outOfField())
+        {
+            pinToWall();
+        }
+    }
+
+    bool outOfField()
+    {
+        if (transform.position.x <= minFieldCoords.x || transform.position.x >= maxFieldCoords.x ||
+            transform.position.z <= minFieldCoords.y || transform.position.z >= maxFieldCoords.y)
+            return true;
+
+        return false;
+    }
+
+    void pinToWall()
+    {
+        ballRb.velocity = new Vector3(0.0f, 0.0f, 0.0f);
+
+        transform.position = new Vector3( Mathf.Max(minFieldCoords.x + 0.25f, Mathf.Min(transform.position.x, maxFieldCoords.x - 0.25f)),
+                                          0.5f,
+                                          Mathf.Max(minFieldCoords.y + 0.25f, Mathf.Min(transform.position.z, maxFieldCoords.y - 0.25f)) );
     }
 
     // to be called by player when he shoots
