@@ -12,7 +12,6 @@ public class Player : MonoBehaviour
 
     private GameObject currentBall;
     private BallBehavior ballScript;
-    private ScoringManager scoringScript;
 
     [SerializeField] TextMeshProUGUI ballCounterText;
     [SerializeField] TextMeshProUGUI forceCounterText;
@@ -51,8 +50,7 @@ public class Player : MonoBehaviour
         if (activated)
         {
             // UI
-            int nbBalls = ballCounter + 1;
-            ballCounterText.SetText(nbBalls + " balls to play");
+            ballCounterText.SetText(ballCounter + " balls to play");
             forceCounterText.SetText("Force: " + shootingForce.ToString("#.00"));
             
             // Shooting
@@ -94,7 +92,7 @@ public class Player : MonoBehaviour
     void SpawnBall()
     {
         ballInHand = true;
-        ballCounter--;
+        //ballCounter--;
         
         currentBall = Instantiate(playerBallPrefab, ballInitPos, playerBallPrefab.transform.rotation);
         ballScript = currentBall.GetComponent<BallBehavior>();
@@ -106,6 +104,7 @@ public class Player : MonoBehaviour
 
     void Shoot()
     {
+        ballCounter--;
         ballInHand = false;
 
         // add randomness to the shooting dir

@@ -43,7 +43,7 @@ public class OpponentBehavior : MonoBehaviour
     public void SpawnBall()
     {
         ballInHand = true;
-        ballCounter--;
+        //ballCounter--;
         currentBall = Instantiate(opponentBallPrefab, opponentPos, opponentBallPrefab.transform.rotation);
         ballScript = currentBall.GetComponent<BallBehavior>();
         ballScript.assignToPlayer(false);
@@ -53,6 +53,7 @@ public class OpponentBehavior : MonoBehaviour
 
     public void Shoot()
     {
+        ballCounter--;
         ballInHand = false;
 
         // Random behavior: shooting (only if closest ball belongs to player) or pointing (default behavior)
