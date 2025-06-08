@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
     [SerializeField] TextMeshProUGUI messageBoxText;
 
     public Vector3 playerPos = new Vector3(0.0f, 1.5f, -8.0f);
+    private Quaternion initArrowRot;
     public float maxShootingForce = 80.0f;
     public float minShootingForce = 30.0f;
     public int ballCounter = 3;
@@ -31,9 +32,8 @@ public class Player : MonoBehaviour
     private bool activated = false;
 
 
-
-    // Start is called before the first frame update
-    void Start()
+    // Use Awake() for self init
+    void Awake()
     {
         shootingDir = Vector3.forward;
         shootingForce = minShootingForce;
@@ -41,9 +41,17 @@ public class Player : MonoBehaviour
         ballInitPos = playerPos;
         arrowDir.transform.position = ballInitPos + new Vector3(-0.12f, 0.0f, 1.0f);
 
-        Debug.Log("player Start ");
+        initArrowRot = Quaternion.Euler(90.0f, 0.0f, 0.0f);
+        arrowDir.transform.rotation = initArrowRot;
     }
 
+    // Start is called before the first frame update
+    void Start()
+    {
+
+    }
+
+    
     // Update is called once per frame
     void Update()
     {
@@ -123,6 +131,12 @@ public class Player : MonoBehaviour
         arrowDir.transform.RotateAround(ballInitPos, -arrowDir.transform.right, _rotVertical);
     }
 
+    public void reInitArrow()
+    {
+        arrowDir.transform.rotation = initArrowRot;
+        arrowDir.transform.position = ballInitPos + new Vector3(-0.12f, 0.0f, 1.0f);
+    }
+
     public void setShootingDir(Vector3 _direction)
     {
         shootingDir = _direction;
@@ -162,5 +176,10 @@ public class Player : MonoBehaviour
         ballInHand = false;
         isKeyDown = false;
         activated = false;
+
+
+        //arrowDir.transform.rotation= Quaternion.identity;
+        //arrowDir.transform.position = ballInitPos + new Vector3(-0.12f, 0.0f, 1.0f);
+
     }
 }

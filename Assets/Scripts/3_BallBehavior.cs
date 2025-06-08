@@ -9,7 +9,7 @@ public class BallBehavior : MonoBehaviour
     private bool wasShot = false;
 
     private float epsilon = 0.001f;
-    private Vector2 minFieldCoords = new Vector2(-13.5f, -11.5f);
+    private Vector2 minFieldCoords = new Vector2(-13.5f, -21.0f);
     private Vector2 maxFieldCoords = new Vector2(13.5f, 13.5f);
 
     private bool isPlayer = true; // flag for player's or opponent's balls

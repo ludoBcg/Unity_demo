@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.UI;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,28 +12,49 @@ public class GameManager : MonoBehaviour
     public GameObject opponent;
     public GameObject scoreManager;
     public GameObject target;
-    public int pointsToWin = 7;  // nb of points to reach to win
+    public GameObject mainCamera;
+    public int pointsToWin = 3;  // nb of points to reach to win
 
     [SerializeField] TextMeshProUGUI messageBoxText;
     [SerializeField] TextMeshProUGUI playerScoreText;
     [SerializeField] TextMeshProUGUI opponentScoreText;
     [SerializeField] TextMeshProUGUI pointsToWinText;
 
+    public GameObject startPanel;
+    [SerializeField] TextMeshProUGUI startMsgText;
+    [SerializeField] TextMeshProUGUI infoMsgText;
+    public Button startButton;
+    public Button restartButton;
+
     private Player playerScript;
     private OpponentBehavior opponentScript;
     private ScoringManager scoringScript;
     private TargetBehavior targetScript;
+    private CameraController cameraScript;
 
     private GameObject[] listBalls;
 
-    private bool isSceneStill = true;   // flag if balls are rolling or not
-    private bool turnFinished = true;   // flag if current turn is finished or not
+    private bool isSceneStill = true;    // flag if balls are rolling or not
+    private bool turnFinished = true;    // flag if current turn is finished or not
     private bool roundFinished = false;  // flag if current round is finished or not
+    private bool playerSarts = true;     // flag if players starts or not
 
-    private bool gameFinished = false;  // flag ifgame is finished or not
+    private bool isGameFinished = true; // flag if game is finished or not
 
     private int totalPlayerPoints = 0;
     private int totalOpponentPoints = 0;
+
+    void Awake()
+    {
+        isGameFinished = true;
+        isSceneStill = true;
+        turnFinished = true;
+        playerSarts = true;
+        roundFinished = false;
+
+        totalPlayerPoints = 0;
+        totalOpponentPoints = 0;
+}
 
     // Start is called before the first frame update
     void Start()
@@ -40,7 +63,9 @@ public class GameManager : MonoBehaviour
         opponentScript = opponent.GetComponent<OpponentBehavior>();
         scoringScript = scoreManager.GetComponent<ScoringManager>();
         targetScript = target.GetComponent<TargetBehavior>();
+        cameraScript = mainCamera.GetComponent<CameraController>();
 
+        cameraScript.gameStarted(true);
         pointsToWinText.SetText(pointsToWin + " points to win");
     }
 
@@ -56,7 +81,7 @@ public class GameManager : MonoBehaviour
 
     void LateUpdate()
     {
-        if (!gameFinished)
+        if (!isGameFinished)
         {
             if (!roundFinished)
             {
@@ -70,6 +95,8 @@ public class GameManager : MonoBehaviour
                 if (isSceneStill && !turnFinished)
                 {
                     scoringScript.calculateScore();
+                    playerSarts = !scoringScript.getPlayerHasPoint();
+
                     turnFinished = true;
                 }
 
@@ -78,7 +105,7 @@ public class GameManager : MonoBehaviour
                 {
                     beforeShot();
 
-                    if (scoringScript.getPlayerHasPoint())
+                    if (!playerSarts)
                     {
                         // if player has the point...
 
@@ -90,12 +117,12 @@ public class GameManager : MonoBehaviour
                         }
                         else if (playerScript.getBallCounter() > 0)
                         {
-                            // if not, player continues as lon as it can
+                            // if not, player continues as long as it can
                             opponentScript.deactivate();
                             playerScript.activate();
                         }
                     }
-                    else if (!scoringScript.getPlayerHasPoint())
+                    else
                     {
                         // if opponent has the point...
 
@@ -111,6 +138,7 @@ public class GameManager : MonoBehaviour
                             playerScript.deactivate();
                             opponentScript.activate(scoringScript.getClosestBall());
                         }
+
                     }
 
 
@@ -142,6 +170,9 @@ public class GameManager : MonoBehaviour
         listBalls = GameObject.FindGameObjectsWithTag("Ball");
 
         isSceneStill = false;
+
+        //playerSarts = !scoringScript.getPlayerHasPoint();
+        //Debug.Log("afterShot():playerStarts = " + playerSarts);
     }
 
     bool checkStillness()
@@ -156,12 +187,12 @@ public class GameManager : MonoBehaviour
             bool currentBallStill = ballScript.stopped();
 
             // if one ball is checkStillness moving, scene is not still
-            if(!currentBallStill)
+            if (!currentBallStill)
                 isStill = false;
         }
 
         // check if target is also still
-        if(!targetScript.stopped())
+        if (!targetScript.stopped())
             isStill = false;
 
         // check if player does not have ball in hand
@@ -180,18 +211,12 @@ public class GameManager : MonoBehaviour
         playerScoreText.SetText("Player score: " + totalPlayerPoints);
         opponentScoreText.SetText("Opponent score: " + totalOpponentPoints);
 
-        if (totalPlayerPoints >= pointsToWin)
+        if (totalPlayerPoints >= pointsToWin || totalOpponentPoints >= pointsToWin)
         {
-            gameFinished = true;
-            pointsToWinText.gameObject.SetActive(true);
-            messageBoxText.SetText("You win!");
-            messageBoxText.gameObject.SetActive(true);
-        }
-        if (totalOpponentPoints >= pointsToWin)
-        {
-            gameFinished = true;
-            messageBoxText.SetText("You loose!");
-            messageBoxText.gameObject.SetActive(true);
+            endGame();
+
+            // early exit
+            return;
         }
 
         playerScript.newRound();
@@ -203,12 +228,78 @@ public class GameManager : MonoBehaviour
         {
             Object.Destroy(ball);
         }
-        
+
         messageBoxText.SetText("New round");
         messageBoxText.gameObject.SetActive(true);
         targetScript.reInit();
+        cameraScript.reInit();
+        playerSarts = scoringScript.getPlayerHasPoint();
         isSceneStill = true;
         roundFinished = false;
         turnFinished = true;
+
+    }
+
+
+    void endGame()
+    {
+        if (totalPlayerPoints >= pointsToWin)
+        {
+            isGameFinished = true;
+            startMsgText.SetText("You win!");
+        }
+        else if (totalOpponentPoints >= pointsToWin)
+        {
+            isGameFinished = true;
+            startMsgText.SetText("You loose!");
+        }
+        else
+            Debug.Log("INCONSISTENT ENDGAME");
+
+        cameraScript.gameStarted(false);
+        messageBoxText.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(true);
+        startPanel.SetActive(true);
+    }
+
+    public void StartGame()
+    {
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        cameraScript.gameStarted(true);
+        startButton.gameObject.SetActive(false);
+        infoMsgText.gameObject.SetActive(false);
+        startPanel.SetActive(false);
+        isGameFinished = false;
+    }
+
+    public void RestartGame()
+    {
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        playerScoreText.SetText("Player score: " + 0);
+        opponentScoreText.SetText("Opponent score: " + 0);
+
+        playerScript.newRound();
+        opponentScript.newRound();
+        scoringScript.newRound();
+
+        listBalls = GameObject.FindGameObjectsWithTag("Ball");
+        foreach (GameObject ball in listBalls)
+        {
+            Object.Destroy(ball);
+        }
+
+        targetScript.reInit();
+        cameraScript.reInit();
+ 
+
+        Awake();
+
+        restartButton.gameObject.SetActive(false);
+        startPanel.SetActive(false);
+
+        
+        Start();
+        StartGame();
     }
 }

@@ -21,6 +21,14 @@ public class ScoringManager : MonoBehaviour
     private int playerPtsCount = 0;
     private int opponentPtsCount = 0;
 
+    void Awake()
+    {
+        closestBall = null;
+        playerHasPoint = false;
+        playerPtsCount = 0;
+        opponentPtsCount = 0;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -96,7 +104,10 @@ public class ScoringManager : MonoBehaviour
 
         if (playerHasPoint)
         {
-            pointsText.SetText("Player: " + playerPtsCount  + " point");
+            string text = "Player: " + playerPtsCount + " point";
+            if (playerPtsCount > 1)
+                text += "s";
+            pointsText.SetText(text);
             playerHasPoint = true;
             for (int i = 0, j = 0; i < scoringMarkers.GetLength(0); i++, j++)
             {
@@ -107,7 +118,10 @@ public class ScoringManager : MonoBehaviour
         }
         else
         {
-            pointsText.SetText("Opponent: " + opponentPtsCount + " point");
+            string text = "Opponent: " + opponentPtsCount + " point";
+            if (opponentPtsCount > 1)
+                text += "s";
+            pointsText.SetText(text);
             playerHasPoint = false;
             for (int i = 0, j = 0; i < scoringMarkers.GetLength(0); i++, j++)
             {
@@ -154,7 +168,6 @@ public class ScoringManager : MonoBehaviour
     public void newRound()
     {
         closestBall = null;
-        playerHasPoint = false;
         playerPtsCount = 0;
         opponentPtsCount = 0;
 
@@ -162,6 +175,16 @@ public class ScoringManager : MonoBehaviour
         {
             marker.SetActive(false);
         }
+        pointsText.SetText("No points yet");
+    }
+
+    public void reInit()
+    {
+        closestBall = null;
+        playerPtsCount = 0;
+        opponentPtsCount = 0;
+        playerHasPoint = false;
+
         pointsText.SetText("No points yet");
     }
 }

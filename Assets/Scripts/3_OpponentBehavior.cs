@@ -23,6 +23,7 @@ public class OpponentBehavior : MonoBehaviour
     private float minForce = 30.0f;
     private float maxForce = 50.0f;
     private float maxOffset = 0.2f; // maxOffset for random shooting direction
+    private float shootingThreshold = 5.0f; // minimum distance from target to consider shooting
 
 
     // Start is called before the first frame update
@@ -64,20 +65,22 @@ public class OpponentBehavior : MonoBehaviour
         if (closestBall != null)
         {
             BallBehavior ballScript = closestBall.GetComponent<BallBehavior>();
-            if (ballScript.belongsToPlayer())
+            Vector3 closestBallToTarget = closestBall.transform.position - target.transform.position;
+            
+            if (ballScript.belongsToPlayer() && closestBallToTarget.magnitude < shootingThreshold)
                 isPointing = UnityEngine.Random.Range(0, 2);
 
             if (isPointing == 0)
             {
                 shootingDir = closestBall.transform.position - transform.position;
                 shootingForce *= 2.0f;
-                Debug.Log("opponent shooting");
+                //Debug.Log("opponent shooting");
             }
-            else
-                Debug.Log("opponent pointing");
+            //else
+            //    Debug.Log("opponent pointing");
         }
-        else
-            Debug.Log("opponent pointing");
+        //else
+        //    Debug.Log("opponent pointing");
 
         shootingDir += new Vector3( UnityEngine.Random.Range(-maxOffset, maxOffset), 
                                     UnityEngine.Random.Range(-maxOffset, maxOffset), 
