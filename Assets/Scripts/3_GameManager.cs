@@ -44,6 +44,8 @@ public class GameManager : MonoBehaviour
     private int totalPlayerPoints = 0;
     private int totalOpponentPoints = 0;
 
+    private int timer;
+
     void Awake()
     {
         isGameFinished = true;
@@ -147,7 +149,13 @@ public class GameManager : MonoBehaviour
             } // end if !roundFinished
             else
             {
+                isGameFinished = true;
+
                 startNewRound();
+
+                timer = 5;
+                StartCoroutine(Countdown());
+                //startNewRound();
             }
         } // end if !gameFinished
     }
@@ -170,36 +178,36 @@ public class GameManager : MonoBehaviour
         listBalls = GameObject.FindGameObjectsWithTag("Ball");
 
         isSceneStill = false;
-
-        //playerSarts = !scoringScript.getPlayerHasPoint();
-        //Debug.Log("afterShot():playerStarts = " + playerSarts);
     }
 
     bool checkStillness()
     {
         bool isStill = true;
 
-        // for each ball in the scene
-        foreach (GameObject ball in listBalls)
+        
+        if (listBalls.Length >= 0)
         {
-            // check if it is still
-            BallBehavior ballScript = ball.GetComponent<BallBehavior>();
-            bool currentBallStill = ballScript.stopped();
+            // for each ball in the scene
+            foreach (GameObject ball in listBalls)
+            {
+                // check if it is still
+                BallBehavior ballScript = ball.GetComponent<BallBehavior>();
+                bool currentBallStill = ballScript.stopped();
 
-            // if one ball is checkStillness moving, scene is not still
-            if (!currentBallStill)
+                // if one ball is checkStillness moving, scene is not still
+                if (!currentBallStill)
+                    isStill = false;
+            }
+
+            // check if target is also still
+            if (!targetScript.stopped())
                 isStill = false;
+
+            // check if player does not have ball in hand
+            if (playerScript.getBallInHand())
+                isStill = false;
+
         }
-
-        // check if target is also still
-        if (!targetScript.stopped())
-            isStill = false;
-
-        // check if player does not have ball in hand
-        if (playerScript.getBallInHand())
-            isStill = false;
-
-
         return isStill;
     }
 
@@ -301,5 +309,20 @@ public class GameManager : MonoBehaviour
         
         Start();
         StartGame();
+    }
+
+
+    IEnumerator Countdown()
+    {
+        while (timer > 0)
+        {
+            yield return new WaitForSeconds(1);
+            timer -= 1;
+            //Debug.Log("countdown");
+            if (timer == 0)
+            {
+                isGameFinished = false;
+            }
+        }
     }
 }
