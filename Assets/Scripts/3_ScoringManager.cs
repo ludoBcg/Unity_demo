@@ -1,11 +1,19 @@
+/*********************************************************************************************************************
+ *
+ * 3_ScoringManager.cs
+ * 
+ * Unity_demo
+ * Scene 3_playground
+ * 
+ * Ludovic Blache
+ *
+ *********************************************************************************************************************/
+
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 
-
+// Handles points calculation
 public class ScoringManager : MonoBehaviour
 {
     public GameObject scoringMarkerPrefab;
@@ -50,11 +58,18 @@ public class ScoringManager : MonoBehaviour
         }
     }
 
-    public void calculateScore()
+    public void CalculateScore()
     {
         listBalls = GameObject.FindGameObjectsWithTag("Ball");
 
         int nbBallsInGame = listBalls.GetLength(0);
+
+        if (nbBallsInGame == 0)
+        {
+            Debug.Log("CANNOT CALCULATE SCORE IN EMPTY SCENE");
+            return;
+        }
+
         double[] listDistances = new double[nbBallsInGame];
 
         // for each ball in the game ...
@@ -81,7 +96,7 @@ public class ScoringManager : MonoBehaviour
             BallBehavior ballScript = ball.GetComponent<BallBehavior>();
 
             // sum nb of closest balls for each player
-            if (ballScript.belongsToPlayer())
+            if (ballScript.BelongsToPlayer())
             {
                 if (opponentPtsCount > 0)
                 {
@@ -104,7 +119,7 @@ public class ScoringManager : MonoBehaviour
 
         if (playerHasPoint)
         {
-            string text = "Player: " + playerPtsCount + " point";
+            string text = "You have:\n" + playerPtsCount + " point";
             if (playerPtsCount > 1)
                 text += "s";
             pointsText.SetText(text);
@@ -118,7 +133,7 @@ public class ScoringManager : MonoBehaviour
         }
         else
         {
-            string text = "Opponent: " + opponentPtsCount + " point";
+            string text = "Computer has:\n" + opponentPtsCount + " point";
             if (opponentPtsCount > 1)
                 text += "s";
             pointsText.SetText(text);
@@ -133,19 +148,19 @@ public class ScoringManager : MonoBehaviour
         
     }
 
-    public bool getPlayerHasPoint()
+    public bool GetPlayerHasPoint()
     {
         return playerHasPoint;
     }
 
-    public GameObject getClosestBall()
+    public GameObject GetClosestBall()
     {
         return closestBall;
     }
 
-    public int getPlayerScore()
+    public int GetPlayerScore()
     {
-        calculateScore();
+        CalculateScore();
         if ( playerHasPoint && playerPtsCount < 1 ||
            !playerHasPoint && playerPtsCount != 0 ||
             playerHasPoint && opponentPtsCount != 0 ||
@@ -154,9 +169,9 @@ public class ScoringManager : MonoBehaviour
         return playerPtsCount;
     }
 
-    public int getOpponentScore()
+    public int GetOpponentScore()
     {
-        calculateScore();
+        CalculateScore();
         if (playerHasPoint && playerPtsCount < 1 ||
            !playerHasPoint && playerPtsCount != 0 ||
             playerHasPoint && opponentPtsCount != 0 ||
@@ -165,7 +180,7 @@ public class ScoringManager : MonoBehaviour
         return opponentPtsCount;
     }
 
-    public void newRound()
+    public void NewRound()
     {
         closestBall = null;
         playerPtsCount = 0;
@@ -178,7 +193,7 @@ public class ScoringManager : MonoBehaviour
         pointsText.SetText("No points yet");
     }
 
-    public void reInit()
+    public void ReInit()
     {
         closestBall = null;
         playerPtsCount = 0;

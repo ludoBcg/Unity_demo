@@ -1,8 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
+/*********************************************************************************************************************
+ *
+ * 3_TargetBehavior.cs
+ * 
+ * Unity_demo
+ * Scene 3_playground
+ * 
+ * Ludovic Blache
+ *
+ *********************************************************************************************************************/
+
 using UnityEngine;
 
+// Represents the target, i.e., the jack, in game
+// Assigned to jack prefab
 public class TargetBehavior : MonoBehaviour
 {
     private Rigidbody targetRb;
@@ -24,7 +34,7 @@ public class TargetBehavior : MonoBehaviour
     }
 
     // checks if the ball is still moving or not
-    public bool stopped()
+    public bool Stopped()
     {
         if (Mathf.Abs(-targetRb.velocity.x) < epsilon
             && Mathf.Abs(-targetRb.velocity.y) < epsilon
@@ -36,7 +46,7 @@ public class TargetBehavior : MonoBehaviour
     }
 
     // re-initialize target position
-    public void reInit()
+    public void ReInit()
     {
         targetRb.velocity = new Vector3(0.0f, 0.0f, 0.0f);
         transform.position = new Vector3(0.0f, 0.187f, 5.0f);

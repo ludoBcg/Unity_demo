@@ -1,17 +1,24 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+/*********************************************************************************************************************
+ *
+ * 3_OpponentBehavior.cs
+ * 
+ * Unity_demo
+ * Scene 3_playground
+ * 
+ * Ludovic Blache
+ *
+ *********************************************************************************************************************/
+
 using UnityEngine;
 
+// Represents the opponent, i.e., computer player
 public class OpponentBehavior : MonoBehaviour
 {
     public GameObject opponentBallPrefab;
     public GameObject target;
-    [SerializeField] TextMeshProUGUI messageBoxText;
 
     public int ballCounter = 3;
-    public Vector3 opponentPos = new Vector3(1.0f, 1.5f, -8.0f);
+    public Vector3 opponentPos = new Vector3(0.0f, 1.5f, -8.0f);
 
     private GameObject currentBall;
     private BallBehavior ballScript;
@@ -22,7 +29,7 @@ public class OpponentBehavior : MonoBehaviour
 
     private float minForce = 30.0f;
     private float maxForce = 50.0f;
-    private float maxOffset = 0.2f; // maxOffset for random shooting direction
+    public float maxOffset = 0.2f; // maxOffset for random shooting direction
     private float shootingThreshold = 5.0f; // minimum distance from target to consider shooting
 
 
@@ -44,12 +51,9 @@ public class OpponentBehavior : MonoBehaviour
     public void SpawnBall()
     {
         ballInHand = true;
-        //ballCounter--;
         currentBall = Instantiate(opponentBallPrefab, opponentPos, opponentBallPrefab.transform.rotation);
         ballScript = currentBall.GetComponent<BallBehavior>();
-        ballScript.assignToPlayer(false);
-
-        //Debug.Log("opponent spawn");
+        ballScript.AssignToPlayer(false);
     }
 
     public void Shoot()
@@ -67,64 +71,51 @@ public class OpponentBehavior : MonoBehaviour
             BallBehavior ballScript = closestBall.GetComponent<BallBehavior>();
             Vector3 closestBallToTarget = closestBall.transform.position - target.transform.position;
             
-            if (ballScript.belongsToPlayer() && closestBallToTarget.magnitude < shootingThreshold)
+            if (ballScript.BelongsToPlayer() && closestBallToTarget.magnitude < shootingThreshold)
                 isPointing = UnityEngine.Random.Range(0, 2);
 
             if (isPointing == 0)
             {
                 shootingDir = closestBall.transform.position - transform.position;
                 shootingForce *= 2.0f;
-                //Debug.Log("opponent shooting");
             }
-            //else
-            //    Debug.Log("opponent pointing");
         }
-        //else
-        //    Debug.Log("opponent pointing");
 
-        shootingDir += new Vector3( UnityEngine.Random.Range(-maxOffset, maxOffset), 
-                                    UnityEngine.Random.Range(-maxOffset, maxOffset), 
-                                    UnityEngine.Random.Range(-maxOffset, maxOffset) );
-        shootingDir.Normalize();
-        ballScript.Shoot(shootingDir, shootingForce);
 
-        //Debug.Log("opponent shoot");
+        ballScript.Shoot(shootingDir, shootingForce, maxOffset);
     }
 
 
-    public int getBallCounter()
+    public int GetBallCounter()
     {
         return ballCounter;
     }
 
-    public bool hasBallInHand()
+    public bool HasBallInHand()
     {
         return ballInHand;
     }
 
-    public bool ballStopped()
+    public bool BallStopped()
     {
-        return ballScript.stopped();
+        return ballScript.Stopped();
     }
 
-    public void activate(GameObject _closestBall)
+    public void Activate(GameObject _closestBall)
     {
         activated = true;
         closestBall = _closestBall;
         if (ballCounter > 0)
             SpawnBall();
 
-        messageBoxText.SetText("Opponent turn");
-        messageBoxText.gameObject.SetActive(true);
     }
 
-    public void deactivate()
+    public void Deactivate()
     {
         activated = false;
-        //Debug.Log("opponent deactivated");
     }
 
-    public void newRound()
+    public void NewRound()
     {
         ballCounter = 3;
         closestBall = null;

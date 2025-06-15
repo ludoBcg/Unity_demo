@@ -1,11 +1,21 @@
+/*********************************************************************************************************************
+ *
+ * 3_GameManager.cs
+ * 
+ * Unity_demo
+ * Scene 3_playground
+ * 
+ * Ludovic Blache
+ *
+ *********************************************************************************************************************/
+
+
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
-using UnityEngine.SceneManagement;
 
+// Handles main game sequence
 public class GameManager : MonoBehaviour
 {
     public GameObject player;
@@ -13,16 +23,17 @@ public class GameManager : MonoBehaviour
     public GameObject scoreManager;
     public GameObject target;
     public GameObject mainCamera;
-    public int pointsToWin = 3;  // nb of points to reach to win
+    public int pointsToWin = 13;
 
     [SerializeField] TextMeshProUGUI messageBoxText;
     [SerializeField] TextMeshProUGUI playerScoreText;
     [SerializeField] TextMeshProUGUI opponentScoreText;
     [SerializeField] TextMeshProUGUI pointsToWinText;
 
+    [SerializeField] TextMeshProUGUI infoMsgText;
+
     public GameObject startPanel;
     [SerializeField] TextMeshProUGUI startMsgText;
-    [SerializeField] TextMeshProUGUI infoMsgText;
     public Button startButton;
     public Button restartButton;
 
@@ -34,29 +45,33 @@ public class GameManager : MonoBehaviour
 
     private GameObject[] listBalls;
 
-    private bool isSceneStill = true;    // flag if balls are rolling or not
-    private bool turnFinished = true;    // flag if current turn is finished or not
-    private bool roundFinished = false;  // flag if current round is finished or not
-    private bool playerSarts = true;     // flag if players starts or not
-
-    private bool isGameFinished = true; // flag if game is finished or not
 
     private int totalPlayerPoints = 0;
     private int totalOpponentPoints = 0;
 
     private int timer;
+  
+    private bool isSceneStill = true;      // flag indicating if balls are rolling or not
+    private bool isPlayersTurn = true;     // flag indicating if player or opponent is now playing
+    private bool isTurnFinished = false;   // flag indicating if current turn is finished or not
+    private bool isRoundFinished = false;  // flag indicating if current round is finished or not
+    private bool isGameActive = false;     // flag indicating if the scene is active or not
 
+    private bool clearScene = false;
     void Awake()
     {
-        isGameFinished = true;
-        isSceneStill = true;
-        turnFinished = true;
-        playerSarts = true;
-        roundFinished = false;
+        clearScene = false;
+
+        listBalls = new GameObject[0];
 
         totalPlayerPoints = 0;
         totalOpponentPoints = 0;
-}
+
+        isSceneStill = true;
+        isTurnFinished = false;
+        isRoundFinished = false; 
+
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -67,13 +82,22 @@ public class GameManager : MonoBehaviour
         targetScript = target.GetComponent<TargetBehavior>();
         cameraScript = mainCamera.GetComponent<CameraController>();
 
-        cameraScript.gameStarted(true);
         pointsToWinText.SetText(pointsToWin + " points to win");
+
+        PauseGame();
     }
 
     void FixedUpdate()
-    {
-
+    {//!!!
+        if (isGameActive)
+        {
+            if (clearScene && isRoundFinished)
+            {
+                ResetScene();
+                clearScene = false;
+                isRoundFinished = false;
+            }
+        }
     }
 
     void Update()
@@ -82,117 +106,82 @@ public class GameManager : MonoBehaviour
     }
 
     void LateUpdate()
-    {
-        if (!isGameFinished)
+    {//!!!
+        if (isGameActive && !clearScene)
         {
-            if (!roundFinished)
+            if (isRoundFinished)
             {
-                // wait for scene to be still
-                if (!isSceneStill)
+                NewRound();
+                clearScene = true;
+                //isRoundFinished = false;
+            }
+            else
+            {
+                if (isTurnFinished)
                 {
-                    isSceneStill = checkStillness();
-                }
-
-                // update score
-                if (isSceneStill && !turnFinished)
-                {
-                    scoringScript.calculateScore();
-                    playerSarts = !scoringScript.getPlayerHasPoint();
-
-                    turnFinished = true;
-                }
-
-                // activate player or opponent depending on score
-                if (turnFinished)
-                {
-                    beforeShot();
-
-                    if (!playerSarts)
+                    if (opponentScript.GetBallCounter() <= 0 && playerScript.GetBallCounter() <= 0)
                     {
-                        // if player has the point...
+                        isRoundFinished = true;
+                        return;
+                    }
 
-                        if (opponentScript.getBallCounter() > 0)
-                        {
-                            // if opponent still has balls, let it play
-                            playerScript.deactivate();
-                            opponentScript.activate(scoringScript.getClosestBall());
-                        }
-                        else if (playerScript.getBallCounter() > 0)
-                        {
-                            // if not, player continues as long as it can
-                            opponentScript.deactivate();
-                            playerScript.activate();
-                        }
+                    isTurnFinished = false;
+                    // ... to calculate score and decide who plays next
+                    NewTurn();
+
+                    // Activate player or opponent for next turn depending on score
+                    if (isPlayersTurn)
+                    {
+                        opponentScript.Deactivate();
+                        playerScript.Activate();
+                        infoMsgText.SetText("You play");
                     }
                     else
                     {
-                        // if opponent has the point...
-
-                        if (playerScript.getBallCounter() > 0)
-                        {
-                            // if player still has balls, let it play
-                            opponentScript.deactivate();
-                            playerScript.activate();
-                        }
-                        else if (opponentScript.getBallCounter() > 0)
-                        {
-                            // if not, opponent continues as long as it can
-                            playerScript.deactivate();
-                            opponentScript.activate(scoringScript.getClosestBall());
-                        }
-
+                        playerScript.Deactivate();
+                        opponentScript.Activate(scoringScript.GetClosestBall());
+                        infoMsgText.SetText("Computer plays");
                     }
 
+                    AfterActivation();
+                } // end if isTurnFinished
 
-                    afterShot();
+
+                if (!isSceneStill)
+                {
+                    isTurnFinished = false;
+                    // Wait for scene to be still ...
+                    isSceneStill = CheckStillness();
                 }
-            } // end if !roundFinished
-            else
-            {
-                isGameFinished = true;
+                else
+                    isTurnFinished = true;
 
-                startNewRound();
-
-                timer = 5;
-                StartCoroutine(Countdown());
-                //startNewRound();
-            }
+            } // end if !isRoundFinished
+            
         } // end if !gameFinished
     }
 
-    void beforeShot()
-    {
-        turnFinished = false;
-
-        if (opponentScript.getBallCounter() <= 0 && playerScript.getBallCounter() <= 0)
-        {
-            messageBoxText.SetText("Round finished");
-            messageBoxText.gameObject.SetActive(true);
-            roundFinished = true;
-        }
-    }
-
-    void afterShot()
+    void AfterActivation()
     {
         // update list of balls in scene
-        listBalls = GameObject.FindGameObjectsWithTag("Ball");
+        UpdateListBalls();
 
+        // Scene is not still anymore as-soon-as player or opponent has been activated
         isSceneStill = false;
     }
 
-    bool checkStillness()
+    bool CheckStillness()
     {
         bool isStill = true;
 
-        
-        if (listBalls.Length >= 0)
+        if (listBalls.Length > 0)
         {
             // for each ball in the scene
             foreach (GameObject ball in listBalls)
             {
                 // check if it is still
                 BallBehavior ballScript = ball.GetComponent<BallBehavior>();
-                bool currentBallStill = ballScript.stopped();
+                bool currentBallStill = ballScript.Stopped();
 
                 // if one ball is checkStillness moving, scene is not still
                 if (!currentBallStill)
@@ -200,72 +189,27 @@ public class GameManager : MonoBehaviour
             }
 
             // check if target is also still
-            if (!targetScript.stopped())
+            if (!targetScript.Stopped())
                 isStill = false;
 
             // check if player does not have ball in hand
-            if (playerScript.getBallInHand())
+            if (playerScript.GetBallInHand())
                 isStill = false;
 
         }
         return isStill;
     }
 
-    void startNewRound()
-    {
-        totalPlayerPoints += scoringScript.getPlayerScore();
-        totalOpponentPoints += scoringScript.getOpponentScore();
-
-        playerScoreText.SetText("Player score: " + totalPlayerPoints);
-        opponentScoreText.SetText("Opponent score: " + totalOpponentPoints);
-
-        if (totalPlayerPoints >= pointsToWin || totalOpponentPoints >= pointsToWin)
-        {
-            endGame();
-
-            // early exit
-            return;
-        }
-
-        playerScript.newRound();
-        opponentScript.newRound();
-        scoringScript.newRound();
-
-        listBalls = GameObject.FindGameObjectsWithTag("Ball");
-        foreach (GameObject ball in listBalls)
-        {
-            Object.Destroy(ball);
-        }
-
-        messageBoxText.SetText("New round");
-        messageBoxText.gameObject.SetActive(true);
-        targetScript.reInit();
-        cameraScript.reInit();
-        playerSarts = scoringScript.getPlayerHasPoint();
-        isSceneStill = true;
-        roundFinished = false;
-        turnFinished = true;
-
-    }
-
-
-    void endGame()
+    void EndGame()
     {
         if (totalPlayerPoints >= pointsToWin)
-        {
-            isGameFinished = true;
             startMsgText.SetText("You win!");
-        }
         else if (totalOpponentPoints >= pointsToWin)
-        {
-            isGameFinished = true;
             startMsgText.SetText("You loose!");
-        }
         else
             Debug.Log("INCONSISTENT ENDGAME");
 
-        cameraScript.gameStarted(false);
-        messageBoxText.gameObject.SetActive(false);
+        PauseGame();
         restartButton.gameObject.SetActive(true);
         startPanel.SetActive(true);
     }
@@ -273,56 +217,194 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        cameraScript.gameStarted(true);
+        NewGame();
+
         startButton.gameObject.SetActive(false);
-        infoMsgText.gameObject.SetActive(false);
         startPanel.SetActive(false);
-        isGameFinished = false;
+
+        string text = "Game starting ...\n";
+        if (isPlayersTurn)
+            text += "You play first";
+        else
+            text += "Computer plays first";
+        infoMsgText.SetText(text);
+
+        timer = 5;
+        StartCoroutine(Countdown());
     }
 
     public void RestartGame()
     {
         //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
-        playerScoreText.SetText("Player score: " + 0);
-        opponentScoreText.SetText("Opponent score: " + 0);
+        playerScoreText.SetText("Your score: " + 0);
+        opponentScoreText.SetText("Computer score: " + 0);
 
-        playerScript.newRound();
-        opponentScript.newRound();
-        scoringScript.newRound();
-
-        listBalls = GameObject.FindGameObjectsWithTag("Ball");
-        foreach (GameObject ball in listBalls)
-        {
-            Object.Destroy(ball);
-        }
-
-        targetScript.reInit();
-        cameraScript.reInit();
- 
+        ResetScene();
 
         Awake();
 
         restartButton.gameObject.SetActive(false);
         startPanel.SetActive(false);
 
-        
         Start();
+        
         StartGame();
+    }
+
+    void ResetScene()
+    {
+        playerScript.NewRound();
+        opponentScript.NewRound();
+        scoringScript.NewRound();
+
+        // Remove balls from the game
+        UpdateListBalls();
+        foreach (GameObject ball in listBalls)
+        {
+            Object.Destroy(ball);
+        }
+        listBalls = new GameObject[0];
+
+        targetScript.ReInit();
+        cameraScript.ReInit();
+    }
+
+    // Starts fresh new game
+    public void NewGame()
+    {
+        // Player or opponent randomly starts the game
+        int playerStarts = UnityEngine.Random.Range(0, 2);
+        isPlayersTurn = playerStarts == 0 ? false : true;
+    }
+
+    // Starts new round when all balls have been used
+    public void NewRound()
+    {
+        PauseGame();
+
+        // Update scores
+        totalPlayerPoints += scoringScript.GetPlayerScore();
+        totalOpponentPoints += scoringScript.GetOpponentScore();
+        playerScoreText.SetText("Your score: " + totalPlayerPoints);
+        opponentScoreText.SetText("Computer score: " + totalOpponentPoints);
+
+        string text = "";
+        int points = Mathf.Max(scoringScript.GetPlayerScore(), scoringScript.GetOpponentScore());
+        
+        if (points == scoringScript.GetPlayerScore())
+        {
+            text += "You get " + scoringScript.GetPlayerScore() + " point";
+        }
+        else
+        {
+            text += "Computer gets " + scoringScript.GetOpponentScore() + " point";
+        }
+
+        if (points > 1)
+            text += "s";
+
+        infoMsgText.SetText(text);
+
+        if (totalPlayerPoints >= pointsToWin || totalOpponentPoints >= pointsToWin)
+        {
+            // Game is finished when pointsToWin has been reached
+            EndGame();
+            // Early exit
+            return;
+        }
+
+        text += "\nNew round starting ...";
+        infoMsgText.SetText(text);
+
+        // if game is not finished, prepare scene for a new round
+        isSceneStill = true;
+
+        // Whoever won the last round starts the next one
+        isPlayersTurn = scoringScript.GetPlayerHasPoint();
+
+        Debug.Log("newRound(): isPlayersTurn = " + isPlayersTurn);
+
+        timer = 5;
+        StartCoroutine(Countdown());
+
+        //ResetScene();
+    }
+
+    // Starts new shooting sequence in the current round
+    public void NewTurn()
+    {
+        if (listBalls.Length > 0)
+        {
+            // calculates score
+            scoringScript.CalculateScore();
+
+            // Defines who currently gets the point
+            bool playerHasPoint = scoringScript.GetPlayerHasPoint();
+
+            if (playerHasPoint)
+            {
+                // case 1: player has the point
+                if (opponentScript.GetBallCounter() > 0)
+                {
+                    // if opponent still has balls, let it play
+                    isPlayersTurn = false;
+                }
+                else if (playerScript.GetBallCounter() > 0)
+                {
+                    // if not, player continues as long as it can
+                    isPlayersTurn = true;
+                }
+            }
+            else
+            {
+                // case 1: opponent has the point
+                if (playerScript.GetBallCounter() > 0)
+                {
+                    // if player still has balls, let it play
+                    isPlayersTurn = true;
+                }
+                else if (opponentScript.GetBallCounter() > 0)
+                {
+                    // if not, opponent continues as long as it can
+                    isPlayersTurn = false;
+                }
+            }
+        }
+
+        //Debug.Log("newTurn(): isPlayersTurn = " + isPlayersTurn);
     }
 
 
     IEnumerator Countdown()
     {
-        while (timer > 0)
+        while (timer > 0 && !isGameActive)
         {
             yield return new WaitForSeconds(1);
             timer -= 1;
-            //Debug.Log("countdown");
+
             if (timer == 0)
             {
-                isGameFinished = false;
+                ResumeGame();
+                //isRoundFinished = false;
             }
         }
+    }
+
+    void UpdateListBalls()
+    {
+        listBalls = GameObject.FindGameObjectsWithTag("Ball");
+    }
+
+    void PauseGame()
+    {
+        isGameActive = false;
+        cameraScript.GamePaused(false);
+    }
+
+    void ResumeGame()
+    {
+        cameraScript.GamePaused(true);
+        isGameActive = true;
     }
 }

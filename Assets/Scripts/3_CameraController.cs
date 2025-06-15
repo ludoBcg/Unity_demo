@@ -1,8 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+/*********************************************************************************************************************
+ *
+ * 3_CameraController.cs
+ * 
+ * Unity_demo
+ * Scene 3_playground
+ * 
+ * Ludovic Blache
+ *
+ *********************************************************************************************************************/
 
+using UnityEngine;
+
+// Main camera control for shooting direction
 public class CameraController : MonoBehaviour
 {
     public float rotationSpeed = 100.0f;     // Rotation speed for A/D/W/S keys in degrees per second
@@ -50,23 +59,23 @@ public class CameraController : MonoBehaviour
 
             transform.RotateAround(playerScript.playerPos, -transform.right, rotVertical);
 
-            playerScript.rotateArrow(rotHorizontal, rotVertical);
+            playerScript.RotateArrow(rotHorizontal, rotVertical);
 
             // send view direction to player, to be used as shooting direction
             viewDir = transform.forward;
-            playerScript.setShootingDir(viewDir);
+            playerScript.SetShootingDir(viewDir);
         }
     }
 
     // re-initialize camera orientation
-    public void reInit()
+    public void ReInit()
     {
         transform.position = initPos;
         transform.rotation = initRot;
-        playerScript.reInitArrow();
+        playerScript.ReInitArrow();
     }
 
-    public void gameStarted(bool _hasStarted)
+    public void GamePaused(bool _hasStarted)
     {
         hasGameStarted = _hasStarted;
     }

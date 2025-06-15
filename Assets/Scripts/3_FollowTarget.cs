@@ -1,7 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
+/*********************************************************************************************************************
+ *
+ * 3_FollowTarget.cs
+ * 
+ * Unity_demo
+ * Scene 3_playground
+ * 
+ * Ludovic Blache
+ *
+ *********************************************************************************************************************/
+
 using UnityEngine;
 
+// Secondary camera control for target tracking
 public class FollowTarget : MonoBehaviour
 {
     // target object to follow

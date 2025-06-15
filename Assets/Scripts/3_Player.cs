@@ -1,8 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
+/*********************************************************************************************************************
+ *
+ * 3_Player.cs
+ * 
+ * Unity_demo
+ * Scene 3_playground
+ * 
+ * Ludovic Blache
+ *
+ *********************************************************************************************************************/
+
 using TMPro;
 using UnityEngine;
 
+// Player controls
 public class Player : MonoBehaviour
 {
 
@@ -15,7 +25,6 @@ public class Player : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI ballCounterText;
     [SerializeField] TextMeshProUGUI forceCounterText;
-    [SerializeField] TextMeshProUGUI messageBoxText;
 
     public Vector3 playerPos = new Vector3(0.0f, 1.5f, -8.0f);
     private Quaternion initArrowRot;
@@ -59,7 +68,8 @@ public class Player : MonoBehaviour
         {
             // UI
             ballCounterText.SetText(ballCounter + " balls to play");
-            forceCounterText.SetText("Force: " + shootingForce.ToString("#.00"));
+            float displayForce = 10.0f * (shootingForce - minShootingForce) / (maxShootingForce - minShootingForce);
+            forceCounterText.SetText("Force: " + displayForce.ToString("#0.0"));
             
             // Shooting
             if (ballInHand)
@@ -100,14 +110,11 @@ public class Player : MonoBehaviour
     void SpawnBall()
     {
         ballInHand = true;
-        //ballCounter--;
         
         currentBall = Instantiate(playerBallPrefab, ballInitPos, playerBallPrefab.transform.rotation);
         ballScript = currentBall.GetComponent<BallBehavior>();
-        ballScript.assignToPlayer(true);
+        ballScript.AssignToPlayer(true);
         arrowDir.SetActive(true);
-
-        //Debug.Log("player spawn");
     }
 
     void Shoot()
@@ -115,34 +122,28 @@ public class Player : MonoBehaviour
         ballCounter--;
         ballInHand = false;
 
-        // add randomness to the shooting dir
-        shootingDir += new Vector3(Random.Range(-maxOffset, maxOffset), Random.Range(-maxOffset, maxOffset), Random.Range(-maxOffset, maxOffset));
-        shootingDir.Normalize();
-
-        ballScript.Shoot(shootingDir, shootingForce);
+        ballScript.Shoot(shootingDir, shootingForce, maxOffset);
         arrowDir.SetActive(false);
-
-        //Debug.Log("player shoot");
     }
 
-    public void rotateArrow(float _rotHorizontal, float _rotVertical)
+    public void RotateArrow(float _rotHorizontal, float _rotVertical)
     {
         arrowDir.transform.RotateAround(ballInitPos, new Vector3(0.0f, 1.0f, 0.0f), _rotHorizontal);
         arrowDir.transform.RotateAround(ballInitPos, -arrowDir.transform.right, _rotVertical);
     }
 
-    public void reInitArrow()
+    public void ReInitArrow()
     {
         arrowDir.transform.rotation = initArrowRot;
         arrowDir.transform.position = ballInitPos + new Vector3(-0.12f, 0.0f, 1.0f);
     }
 
-    public void setShootingDir(Vector3 _direction)
+    public void SetShootingDir(Vector3 _direction)
     {
         shootingDir = _direction;
     }
 
-    public void activate()
+    public void Activate()
     {
         activated = true;
         Start();
@@ -150,36 +151,28 @@ public class Player : MonoBehaviour
         if (ballCounter>0)
             SpawnBall();
 
-        messageBoxText.SetText("Your turn");
-        messageBoxText.gameObject.SetActive(true);
     }
 
-    public void deactivate()
+    public void Deactivate()
     {
         activated = false;
-        //Debug.Log("player deactivated");
     }
 
-    public bool getBallInHand()
+    public bool GetBallInHand()
     {
         return ballInHand;
     }
 
-    public int getBallCounter()
+    public int GetBallCounter()
     {
         return ballCounter;
     }
 
-    public void newRound()
+    public void NewRound()
     {
         ballCounter = 3;
         ballInHand = false;
         isKeyDown = false;
         activated = false;
-
-
-        //arrowDir.transform.rotation= Quaternion.identity;
-        //arrowDir.transform.position = ballInitPos + new Vector3(-0.12f, 0.0f, 1.0f);
-
     }
 }
