@@ -2144,7 +2144,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Use A/W/S/D or  arrow keys for direction
+  m_text: 'Use A/W/S/D or arrow keys for direction
 
     Press and maintain spacebar
     to shoot'

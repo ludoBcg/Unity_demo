@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
     }
 
     void FixedUpdate()
-    {//!!!
+    {
         if (isGameActive)
         {
             if (clearScene && isRoundFinished)
@@ -106,14 +106,13 @@ public class GameManager : MonoBehaviour
     }
 
     void LateUpdate()
-    {//!!!
+    {
         if (isGameActive && !clearScene)
         {
             if (isRoundFinished)
             {
                 NewRound();
                 clearScene = true;
-                //isRoundFinished = false;
             }
             else
             {
@@ -323,7 +322,7 @@ public class GameManager : MonoBehaviour
         // Whoever won the last round starts the next one
         isPlayersTurn = scoringScript.GetPlayerHasPoint();
 
-        Debug.Log("newRound(): isPlayersTurn = " + isPlayersTurn);
+        //Debug.Log("newRound(): isPlayersTurn = " + isPlayersTurn);
 
         timer = 5;
         StartCoroutine(Countdown());
