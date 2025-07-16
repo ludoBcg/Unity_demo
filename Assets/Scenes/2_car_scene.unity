@@ -2357,11 +2357,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45be904519e806f45ad23694c5ee9387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horsePower: 20000
+  horsePower: 15000
   turnSpeed: 5000
-  maxSpeed: 50
+  maxSpeed: 30
   speedometerText: {fileID: 297080331}
-  speed: 10
+  speed: 0
   rpmText: {fileID: 1733955105}
   rpm: 0
   allWheels:

@@ -6,11 +6,11 @@ using TMPro;
 public class PlayerController : MonoBehaviour
 {
     // forward speed
-    [SerializeField] float horsePower = 20000.0f;
+    [SerializeField] float horsePower = 15000.0f;
     // turning speed
     [SerializeField] float turnSpeed = 5000.0f;
     // maximum speed
-    [SerializeField] float maxSpeed = 50.0f;
+    [SerializeField] float maxSpeed = 30.0f;
 
     // display speed
     [SerializeField] TextMeshProUGUI speedometerText;
@@ -72,8 +72,6 @@ public class PlayerController : MonoBehaviour
         //transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput);
         if (speed < maxSpeed)
             playerRB.AddForce(playerRB.transform.forward * horsePower * forwardInput);
-
-        
 
 
     }
