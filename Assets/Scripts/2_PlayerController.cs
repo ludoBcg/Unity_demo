@@ -15,8 +15,6 @@ public class PlayerController : MonoBehaviour
     // display speed
     [SerializeField] TextMeshProUGUI speedometerText;
     [SerializeField] float speed;
-    [SerializeField] TextMeshProUGUI rpmText;
-    [SerializeField] float rpm;
 
     // wheel colliders
     [Header("WheelCollider")]
@@ -41,10 +39,6 @@ public class PlayerController : MonoBehaviour
     {
         speed = Mathf.Round(playerRB.velocity.magnitude * 2.237f); //3.6 for kph
         speedometerText.SetText("Speed: " + speed + "mph");
-
-        rpm = Mathf.Round((speed % 30) * 40);
-        rpmText.SetText("RPM: " + rpm);
-
     }
 
     // Update is called once per frame
